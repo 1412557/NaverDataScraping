@@ -3,6 +3,7 @@ Simple module to scrape the page https://datalab.naver.com/keyword/trendResult.n
 
 ## Getting Started
 Need Python 3.8 or greater
+Need Chrome 114
 
 ### Install required packages
 ``` pip install -r requirements.txt ```
