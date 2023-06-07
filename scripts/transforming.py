@@ -2,7 +2,8 @@ import abc
 import logging
 import pandas as pd
 import boto3
-from scripts.constants import PROCESS_FOLDER, S3_BUCKET_NAME
+from botocore.exceptions import ClientError
+from scripts.constants import PROCESS_FOLDER, S3_BUCKET_NAME, ACCESS_ID, ACCESS_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +46,10 @@ class ETLProcess(AbstractETL):
             with open(PROCESS_FOLDER + "\\" + self.metadata["loaded_file"], "r", encoding="utf8") as f:
                 with open(PROCESS_FOLDER + "\\" + self.metadata["transformed_file"], "w", newline='') as fw:
                     # Skip metadata row, we already have meta_data as arguments
-                    self.metadata['downloaded_file_meta'] = {}
+                    # self.metadata['downloaded_file_meta'] = {}
                     for i in range(6):
                         line = f.readline().split(',')
-                        self.metadata['downloaded_file_meta'][line[0]] = line[1:]
+                        # self.metadata[line[0]] = str(line[1:])
                     reader = csv.DictReader(f, delimiter=",")
                     writer = csv.DictWriter(fw, delimiter=",", fieldnames=["date", "keyword", "score"])
                     writer.writeheader()
@@ -68,19 +69,27 @@ class ETLProcess(AbstractETL):
         # to s3 bucket along with metadata
         print(f"Final metadata to bring along to S3 bucket: {self.metadata}")
         logging.info("Transfer the file to S3 bucket")
-
-        # s3 = boto3.client('s3')
-        # s3_location = "http://{}.s3.amazonaws.com/{}".format(S3_BUCKET_NAME, "logo.png")
-        # try:
-        #     data = s3.upload_fileobj(
-        #         PROCESS_FOLDER + "\\" + self.metadata["transformed_file"],
-        #         S3_BUCKET_NAME,
-        #         "logo.png",
-        #         ExtraArgs={
-        #             "ACL": "public-read",
-        #             "ContentType": "csv"
-        #         }
-        #     )
-        #     return s3_location
-        # except Exception as e:
-        #     logging.info("Uploading to s3 failed")
+        from os import path
+        # S3 object_name is not specified, use file_name
+        object_name = path.basename(self.metadata["transformed_file"])
+        for key in self.metadata.keys():
+            if type(self.metadata[key]) != 'str':
+                self.metadata[key] = str(self.metadata[key])
+        # Upload the file
+        s3_client = boto3.client('s3',
+                                 aws_access_key_id=ACCESS_ID,
+                                 aws_secret_access_key=ACCESS_KEY)
+        try:
+            response = s3_client.upload_file(
+                PROCESS_FOLDER + '\\' + self.metadata["transformed_file"],
+                S3_BUCKET_NAME,
+                object_name,
+                ExtraArgs={
+                    'Metadata': self.metadata,
+                    'ACL': 'public-read'
+                },
+            )
+        except ClientError as e:
+            logging.error(e)
+        else:
+            logging.info("successfully uploaded to s3")

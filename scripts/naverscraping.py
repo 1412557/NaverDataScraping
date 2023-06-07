@@ -35,7 +35,6 @@ class NaverScraping(AbstractNaverScraping):
         super().__init__()
         self._keyword = keyword
         self.period = period
-        self.date_range = date_range
         self.device = device
         self.gender = gender
         self.age = age
@@ -44,7 +43,6 @@ class NaverScraping(AbstractNaverScraping):
         metadata = {
             'keyword': self._keyword,
             'period': self.period,
-            'date_range': self.date_range[:2],
             'device': self.device,
             'gender': self.gender,
             'age': self.age
