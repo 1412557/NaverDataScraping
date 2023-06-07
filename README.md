@@ -23,4 +23,9 @@ folder files used as staging\
 folder process will store the loaded and transformed data
 
 ### DEMO VIDEO
-https://www.youtube.com/watch?v=HXMRO6JBMXI
+https://www.youtube.com/watch?v=IwGVWJoBZWw
+
+### Metadata
+All input parameter will be included as metadata along with downloaded file metadata to be put on S3\
+unfortunately current boto3 doesn't support unicode string as metadata so I can't upload the metadata of the file (which is in Korean), temporarily solution is to do some translate to ascii string\
+metadata of S3 file can have very good use in the later process: **Last modified** can be used to track update of the file when we use stream uploading the file, check the time lag between the job's end_time and the arrival_time of data file on S3, **ETag** used for versioning, ...
