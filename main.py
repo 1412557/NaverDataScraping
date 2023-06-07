@@ -7,31 +7,30 @@ import sys
 
 def main():
     try:
-
         logging.info("Main() started")
         # Setting up arguments
-        keyword = {
+        keyword = { # Must have keyword
             "Computer": "Apple, Microsoft",
             "Cosmetic": "YSL",
             "Football": "Liverpool",
             "War": "Russia"
         }
-        period = {
-            'period': '2 months',
+        period = { # valid option include [1 month, 3 months, 1 year, entire]
+            'period': '1 year',
             'frequency': 'month',
             'date_range': ['2019/04/19', '2021/12/23']
         }
-        device = 'entire'
-        gender = 'male'
-        age = ['-12', '60-']
+        device = 'pc'
+        gender = 'female'
+        age = ['-12', '60-'] # age can be entire to select all, check option in AGE_LIST
 
-        # Clean up folders
+        # Clean up folders everytime we start scraping,
         clean_up_repo(constants.DOWNLOAD_FOLDER)
         clean_up_repo(constants.PROCESS_FOLDER)
 
         # Start scraping
         crawler = NaverScraping(keyword, period=period, device=device, gender=gender, age=age)
-        meta_data = crawler.get_metadata()
+        meta_data = crawler.get_metadata() # auto gen meta_data
         files = crawler.start_scraping()
 
         # Start ETL
@@ -40,7 +39,7 @@ def main():
         for file in files:
             file_path = constants.DOWNLOAD_FOLDER + f"\\{file}"
             meta_data["file_name"] = file
-            pipeline = ETLProcess(file_path, meta_data)
+            pipeline = ETLProcess(file_path, meta_data) # along with metadata in the file, we can upload it to s3
             pipeline.process()
     except Exception as exp:
         logging.error("Error in main() method. Stack Trace " + str(exp), exc_info=True)

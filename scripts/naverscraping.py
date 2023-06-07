@@ -162,7 +162,7 @@ class NaverScraping(AbstractNaverScraping):
         # Input age
         try:
             logging.info("Start setting up parameters for age")
-            if 'all' in self.age:
+            if 'entire' in self.age:
                 age_xpath = "//input[contains(@id,'item_age') and contains(@class,'check_all')]"
                 tick_box_age = self.driver.find_element(By.XPATH, age_xpath)
                 tick_box_age.click()
